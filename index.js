@@ -1,4 +1,6 @@
+const Joi = require("joi")
 const express = require("express")
+
 const app = express()
 app.use(express.json())
 
@@ -24,6 +26,20 @@ app.get("/api/genres/:id", (req, res) => {
 
   if (!genre)
     return res.status(404).send("The genre with provided ID doesn't exists.")
+
+  res.send(genre)
+})
+
+app.post("/api/genres", (req, res) => {
+  const schema = {
+    genre: Joi.string().min(3).required(),
+  }
+  const result = Joi.validate(req.body, schema)
+
+  if (result.error) return res.status(400).send(result.error.details[0].message)
+
+  const genre = { id: genres.length + 1, genre: req.body.genre }
+  genres.push(genre)
 
   res.send(genre)
 })
