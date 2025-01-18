@@ -23,7 +23,6 @@ app.get("/api/genres", (req, res) => {
 //Get single genre filtered by ID
 app.get("/api/genres/:id", (req, res) => {
   const genre = genres.find((g) => g.id === parseInt(req.params.id))
-
   if (!genre)
     return res.status(404).send("The genre with provided ID doesn't exists.")
 
@@ -31,12 +30,8 @@ app.get("/api/genres/:id", (req, res) => {
 })
 
 app.post("/api/genres", (req, res) => {
-  const schema = {
-    genre: Joi.string().min(3).required(),
-  }
-  const result = Joi.validate(req.body, schema)
-
-  if (result.error) return res.status(400).send(result.error.details[0].message)
+  const { error } = validateGenre(req.body)
+  if (error) return res.status(400).send(error.details[0].message)
 
   const genre = { id: genres.length + 1, genre: req.body.genre }
   genres.push(genre)
@@ -46,19 +41,32 @@ app.post("/api/genres", (req, res) => {
 
 app.put("/api/genres/:id", (req, res) => {
   const genre = genres.find((g) => g.id === parseInt(req.params.id))
-
   if (!genre)
     return res.status(404).send("The genre with provided ID doesn't exists.")
 
-  const schema = {
-    genre: Joi.string().min(3).required(),
-  }
-  const result = Joi.validate(req.body, schema)
-  if (result.error) return res.status(400).send(result.error.details[0].message)
+  const { error } = validateGenre(req.body)
+  if (error) return res.status(400).send(error.details[0].message)
 
   genre.genre = req.body.genre
   res.send(genre)
 })
+
+app.delete("/api/genres/:id", (req, res) => {
+  const genre = genres.find((g) => g.id === parseInt(req.params.id))
+  if (!genre)
+    return res.status(404).send("The genre with provided ID doesn't exists.")
+
+  const index = genres.indexOf(genre)
+  genres.splice(index, 1)
+  res.send(genre)
+})
+
+function validateGenre(genre) {
+  const schema = {
+    genre: Joi.string().min(3).required(),
+  }
+  return Joi.validate(genre, schema)
+}
 
 app.listen(3000, () => {
   console.log("Listening to port 3000...")
