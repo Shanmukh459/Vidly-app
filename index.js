@@ -1,8 +1,14 @@
+const mongoose = require("mongoose")
 const express = require("express")
 const home = require("./routes/home")
 const genres = require("./routes/genres")
-
 const app = express()
+
+mongoose
+  .connect("mongodb://localhost/vidly")
+  .then(() => console.log("Connected to MongoDB database..."))
+  .catch((err) => console.error(err))
+
 app.use(express.json())
 
 app.use("/", home)
